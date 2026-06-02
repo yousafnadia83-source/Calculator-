@@ -1,0 +1,92 @@
+const result = document.getElementById('result');
+const history = document.getElementById('history');
+const buttons = document.querySelectorAll('.btn');
+
+let currentInput = '0';
+let previousInput = '';
+let operation = null;
+let shouldResetScreen = false;
+
+function updateDisplay() {
+  result.textContent = currentInput;
+}
+
+function appendNumber(num) {
+  if (shouldResetScreen) {
+    currentInput = '0';
+    shouldResetScreen = false;
+  }
+  if (num === '.' && currentInput.includes('.')) return;
+  if (currentInput === '0' && num !== '.') {
+    currentInput = num;
+  } else {
+    currentInput += num;
+  }
+}
+
+function chooseOperation(op) {
+  if (currentInput === '0') return;
+  if (previousInput !== '') {
+    calculate();
+  }
+  operation = op;
+  previousInput = currentInput;
+  history.textContent = previousInput + ' + op;
+  shouldResetScreen = true;
+}
+
+function calculate() {
+  let computation;
+  const prev = parseFloat(previousInput);
+  const current = parseFloat(currentInput);
+  if (isNaN(prev) || isNaN(current)) return;
+
+  switch (operation) {
+    case '+': computation = prev + current; break;
+    case '−': computation = prev - current; break;
+    case '×': computation = prev * current; break;
+    case '÷': computation = prev / current; break;
+    case '%': computation = prev % current; break;
+    default: return;
+  }
+  
+  history.textContent = previousInput + ' + operation + ' + currentInput + ' =';
+  currentInput = computation.toString();
+  operation = null;
+  previousInput = '';
+  shouldResetScreen = true;
+}
+
+function clear() {
+  currentInput = '0';
+  previousInput = '';
+  operation = null;
+  history.textContent = '';
+}
+
+function deleteNumber() {
+  currentInput = currentInput.toString().slice(0, -1);
+  if (currentInput === '') currentInput = '0';
+}
+
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    const value = button.textContent;
+    
+    if (!isNaN(value) || value === '.') {
+      appendNumber(value);
+    } else if (['+', '−', '×', '÷', '%'].includes(value)) {
+      chooseOperation(value);
+    } else if (value === '=') {
+      calculate();
+    } else if (value === 'AC') {
+      clear();
+    } else if (value === 'DEL') {
+      deleteNumber();
+    }
+    
+    updateDisplay();
+  });
+});
+
+updateDisplay();
